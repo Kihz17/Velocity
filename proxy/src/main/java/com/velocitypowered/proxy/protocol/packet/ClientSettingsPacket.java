@@ -140,31 +140,65 @@ public class ClientSettingsPacket implements MinecraftPacket {
 
   @Override
   public void decode(ByteBuf buf, ProtocolUtils.Direction direction, ProtocolVersion version) {
-    this.locale = ProtocolUtils.readString(buf, 16);
-    this.viewDistance = buf.readByte();
-    this.chatVisibility = ProtocolUtils.readVarInt(buf);
-    this.chatColors = buf.readBoolean();
-
-    if (version.noGreaterThan(ProtocolVersion.MINECRAFT_1_7_6)) {
-      this.difficulty = buf.readByte();
+    try {
+      this.locale = ProtocolUtils.readString(buf, 16);
+    } catch (Exception e) {
+      this.locale = "en_us";
     }
 
-    this.skinParts = buf.readUnsignedByte();
+    try {
+      this.viewDistance = buf.readByte();
+    } catch (Exception e) {
+      this.viewDistance = 10;
+     }
 
-    if (version.noLessThan(ProtocolVersion.MINECRAFT_1_9)) {
-      this.mainHand = ProtocolUtils.readVarInt(buf);
+    try {
+      this.chatVisibility = ProtocolUtils.readVarInt(buf);
+    } catch (Exception e) {
+      this.chatVisibility = 0;
+    }
 
-      if (version.noLessThan(ProtocolVersion.MINECRAFT_1_17)) {
-        this.textFilteringEnabled = buf.readBoolean();
+    try {
+      this.chatColors = buf.readBoolean();
+    } catch (Exception e) {
+      this.chatColors = true;
+    }
 
-        if (version.noLessThan(ProtocolVersion.MINECRAFT_1_18)) {
-          this.clientListingAllowed = buf.readBoolean();
+    try {
+      if (version.noGreaterThan(ProtocolVersion.MINECRAFT_1_7_6)) {
+        this.difficulty = buf.readByte();
+      }
+    } catch (Exception e) {
+      this.difficulty = 0;
+    }
 
-          if (version.noLessThan(ProtocolVersion.MINECRAFT_1_21_2)) {
-            this.particleStatus = ProtocolUtils.readVarInt(buf);
+    try {
+      this.skinParts = buf.readUnsignedByte();
+    } catch (Exception e) {
+      this.skinParts = 127;
+    }
+
+    try {
+      if (version.noLessThan(ProtocolVersion.MINECRAFT_1_9)) {
+        this.mainHand = ProtocolUtils.readVarInt(buf);
+
+        if (version.noLessThan(ProtocolVersion.MINECRAFT_1_17)) {
+          this.textFilteringEnabled = buf.readBoolean();
+
+          if (version.noLessThan(ProtocolVersion.MINECRAFT_1_18)) {
+            this.clientListingAllowed = buf.readBoolean();
+
+            if (version.noLessThan(ProtocolVersion.MINECRAFT_1_21_2)) {
+              this.particleStatus = ProtocolUtils.readVarInt(buf);
+            }
           }
         }
       }
+    } catch (Exception e) {
+      this.mainHand = 1;
+      this.textFilteringEnabled = true;
+      this.clientListingAllowed = true;
+      this.particleStatus = 0;
     }
   }
 
